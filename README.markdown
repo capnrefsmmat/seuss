@@ -1,5 +1,4 @@
-A Python system for generating rhyming poetry with Markov chains. Functional, 
-but not yet documented.
+A Python system for generating rhyming poetry with Markov chains.
 
 Overview
 --------
@@ -27,6 +26,31 @@ The basic process looks like this:
 3. Subsequent lines follow the same process, according to the supplied rhyme
    scheme.
 
+Usage
+-----
+
+First, supply the robot with a source text. In this example, we will use the 
+World English Bible from ebible.org; use the plain-text version and put it all
+in one text file. Cut out any parts you do not want and save it in `sources/`
+as `bible-raw.txt`.
+
+Next, run `format.pl` to split the file into sentences:
+
+    $ format.pl bible
+
+This will produce `bible.txt`, which contains the Bible with one sentence per
+line. This can be loaded by the Markov chain generator.
+
+Heading back up to the directory containing `makeChains.py`, run:
+
+    $ python makeChains.py bible
+
+This may take a long time. Ensure the script has access to the `cache/`
+directory and can create files there. Once done, there should be three new
+files in `cache/` containing the Markov chains.
+
+You can now write poetry. Run `python rhyme.py` to see the usage instructions.
+
 IRC Bot
 -------
 
@@ -49,7 +73,7 @@ The bot will join any channel it is /invited to, so be wary. It will also
 respond to any /msg directed to it; be careful of infinite loops that may
 occur when a bot msgs the rhyming bot. (For example, in testing the bot
 received a msg from NickServ on connecting, responded, received an "unknown
-command" error, responded, etc.) You can use self.nickExcludeList to avoid
+command" error, responded, etc.) You can use `self.nickExcludeList` to avoid
 this issue.
 
 Web Interface
