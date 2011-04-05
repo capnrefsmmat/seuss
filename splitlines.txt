@@ -1,0 +1,2 @@
+cat weeping-raw.txt | sed -e "s/\./\.\n/g" > weeping.txt
+cat ulysses-raw.txt | tr '\n' " " | sed -e "s/\./\.\n/g" - > ulysses.txt
