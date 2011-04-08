@@ -355,7 +355,4 @@ if __name__ == "__main__":
     gen.close()
     
     for line in lines:
-        if line is None:
-            print "NO LINE"
-        else:
-            print " ".join(line)
+        print " ".join(line)
