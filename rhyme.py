@@ -131,14 +131,14 @@ class RhymingMarkovGenerator:
         except ValueError:
             rhymeLine = False
 
+        # on the first line, there is no line to find yet
+        try:
+            seed = self.lines[-1]
+        except IndexError:
+            seed = []
+            self.poem.append([])
+
         for i in range(numWords):
-            # on the first line, there is no line to find yet
-            try:
-                seed = self.lines[-1]
-            except IndexError:
-                seed = []
-                self.poem.append([])
-            
             words = self.brains[brain][chain].getNextWords(seed)
             
             if len(words) == 0:
