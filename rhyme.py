@@ -206,16 +206,14 @@ class RhymingMarkovGenerator:
             
             person = self.personalities[i] # what brain are we rhyming with?
             
-            self.poem.append(self.getLine(person, i))
+            self.poem.append(" ".join(self.getLine(person, i)))
     
-    def getPoems(self, numPoems):
-        """So, get numPoems poems for us to play with."""
-        for poem in range(numPoems):
-            self.getPoem()
-            self.poems.extend(self.poem)
-            self.poems.append([""])
-        
-        return self.poems
+    def __iter__(self):
+        return self
+    
+    def next(self):
+        self.getPoem()
+        return self.poem
     
     def close(self):
         """Make sure our brains are closed so they save their contents."""
@@ -269,9 +267,11 @@ if __name__ == "__main__":
         personalities.append(people[personality])
     
     gen = RhymingMarkovGenerator(rhymescheme, personalities, lineLength, sourceDir, cacheDir)
-
-    lines = gen.getPoems(numPoems)
-    gen.close()
     
-    for line in lines:
-        print " ".join(line)
+    for i in range(numPoems):
+        poem = gen.next()
+        for line in poem:
+            print line
+        print ""
+    
+    gen.close()
