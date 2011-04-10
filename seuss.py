@@ -51,19 +51,6 @@ class SeussBot(irc.IRCClient):
                     msg = msg[2]
                     print "Rhyming on command in %s: '%s'" % (channel, msg)
                 
-                if msg.startswith('use'):
-                    msg = msg.split(' ', 2)
-                    channel = msg[1]
-                    # self.gen.poem = [msg.split(),]
-                    self.gen.lines.append([msg[2]])
-                    person = random.choice(self.brains)
-                    self.gen.addWords(1, person, "rhy", inReverse = True)
-                    self.gen.addWords(10, person, "rev", endOfLine = True, inReverse = True)
-                    self.gen.lines[-1].reverse()
-                    
-                    self.msg(msg[1], " ".join(self.gen.lines[-1]))
-                    return
-                
             prefix = True
         elif self.nickname in msg.lower():
             msg = re.compile(self.nickname + "[:,]* ?", re.I).sub('', msg)
