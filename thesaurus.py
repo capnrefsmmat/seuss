@@ -8,12 +8,13 @@ class Thesaurus:
     def getSynonyms(self, word):
         """Also based on wordnet.py with some modifications -- see
            createThesaurus.py for details"""
+        syns = set()
+        
         try:
             keys = self.words[word]
         except KeyError:
-            return set()
+            return syns
         
-        syns = set()
         for key in keys:
             syns = syns.union(self.syns[str(key)])
         
