@@ -1,4 +1,4 @@
-import random, collections, shelve
+import random, shelve
 
 class MarkovChain:
 	start = "[START!*]"
