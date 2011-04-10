@@ -101,18 +101,14 @@ class RhymingMarkovGenerator:
         if rhymeLine is False or rhymeLine > (len(self.poem) - 1) or len(self.poem[rhymeLine]) == 0:
             return [] # no rhyming required, or the line has no words
         
-        rhymeLine = self.poem[rhymeLine]
-        
-        return self.thesaurus.getListSynonyms(map(self.cleanWord, rhymeLine))
+        return self.thesaurus.getListSynonyms(map(self.cleanWord, self.poem[rhymeLine]))
     
     def getSynonymWeight(self, word, rhymeLine):
         """Is this word a synonym of one on previous lines?"""
         if len(self.poem) == 0:
             return 0
         
-        syns = self.getSynonyms(len(self.poem) - 1, rhymeLine)
-        
-        if word in syns:
+        if word in self.getSynonyms(len(self.poem) - 1, rhymeLine):
             return self.synonymWeight
         
         return 0
@@ -129,7 +125,8 @@ class RhymingMarkovGenerator:
         except ValueError:
             rhymeLine = False
         
-        # on the first line, there is no line to find yet
+        # try to get the previous words on this line as a seed. if there are none, start a new line
+        # (either lines is empty, or it contains the last few words on a line to be completed)
         try:
             seed = lines[-1]
         except IndexError:
@@ -144,10 +141,10 @@ class RhymingMarkovGenerator:
             
             weightedWords = dict()
             for word, num in words.iteritems():
-                # add up our weights
                 weightedWords[word] = num * self.frequencyWeight
                 weightedWords[word] += self.getSynonymWeight(word, rhymeLine)
             
+            # do a weighted random selection from the words
             rand = random.randint(0, sum(weightedWords.values()))
             pos = 0
             for word, weight in weightedWords.items():
@@ -163,8 +160,9 @@ class RhymingMarkovGenerator:
         """Pick out some possible lines of poetry. Iterate through and choose the best possible line."""
         
         lines = []
-        lineWeights = []
-        for line in range(self.tryLines):
+        maxLine = maxWeight = -1
+        
+        for line in range(0, self.tryLines-1):
             # right, what shall we rhyme with?
             newWord = self.getRhymingWord(curLine, person)
             weight = 0
@@ -176,21 +174,15 @@ class RhymingMarkovGenerator:
                 weight += self.addWords(self.lineLen - 2, person, "rev", lines)
                 lines[-1].reverse()
             else:
-                # found no rhyme, or perhaps this line doesn't need to rhyme
-                # make up a new line
+                # found no rhyme, or perhaps this line doesn't need to rhyme.
                 lines.append([])
                 weight += self.addWords(self.lineLen, person, "fwd", lines)
                 
-            lineWeights.append(weight)
+            if weight > maxWeight:
+                maxWeight = weight
+                maxLine = line
         
-        max = maxPos = -1
-
-        for i in range(self.tryLines):
-            if lineWeights[i] > max:
-                max = lineWeights[i]
-                maxPos = i
-        
-        return lines[maxPos]
+        return lines[maxLine]
     
     def getPoem(self):
         """Get a poem, according to our set rhymescheme and personality."""
@@ -229,24 +221,24 @@ people = {"b": "bible", "e": "erotica", "c": "carroll", "u": "unabomber", "w": "
 if __name__ == "__main__":         
     if len(sys.argv) < 5:
         print """Usage:
-    rhyme.py personality rhymescheme linelength numpoems
-        
-    where personality is a choice of personality, rhymescheme is a rhyme scheme,
-    such as "aaaba", linelength is an integer representing the maximum number of
-    words per line, and numpoems is the number of repetitions desired.
+rhyme.py personality rhymescheme linelength numpoems
     
-    Personality choices are per-line, so personality must match rhymescheme in 
-    length. Each character corresponds to a personality.
-    
-    If a rhyme scheme spans multiple stanzas, it can be specified as follows:
-      abab:cdcd:ee
-    and so on. The ":" characters indicate a stanza division.
-    
-    If numlines is larger than the size the rhyme scheme indicates, multiple
-    repetitions of the rhyme scheme will be made. Only whole repetitions
-    are attemped, so if the rhyme scheme is five lines long and numlines 7,
-    only one set will be constructed. Once numlines is raised to 10, the
-    rhyme scheme will be repeated once in another set of stanzas."""
+where personality is a choice of personality, rhymescheme is a rhyme scheme,
+such as "aaaba", linelength is an integer representing the maximum number of
+words per line, and numpoems is the number of repetitions desired.
+
+Personality choices are per-line, so personality must match rhymescheme in 
+length. Each character corresponds to a personality.
+
+If a rhyme scheme spans multiple stanzas, it can be specified as follows:
+  abab:cdcd:ee
+and so on. The ":" characters indicate a stanza division.
+
+If numlines is larger than the size the rhyme scheme indicates, multiple
+repetitions of the rhyme scheme will be made. Only whole repetitions are
+attemped, so if the rhyme scheme is five lines long and numlines 7, only one
+set will be constructed. Once numlines is raised to 10, the rhyme scheme will
+be repeated once in another set of stanzas."""
         print ""
         print "Available personalities:"
         for char, personality in people.items():
