@@ -65,7 +65,6 @@ class RhymingMarkovGenerator:
     
     def cleanWord(self, word):
         """ Get the junk off a word to look it up. """
-        
         return word.strip().strip(".,'!?\"()*;:-")
     
     def getRhymeLine(self, rhymeLetter, lineNumber):
@@ -220,8 +219,6 @@ class RhymingMarkovGenerator:
             
             weightedWords = dict()
             for word, num in words.iteritems():
-                if word is None: # for some reasons our chains have None in them
-                    continue
                 # add up our weights
                 weightedWords[word] = num * self.frequencyWeight
                 #weightedWords[word] += self.getAlliterationWeight(word, seed)
@@ -289,7 +286,6 @@ class RhymingMarkovGenerator:
     
     def getPoems(self, numPoems):
         """So, get numPoems poems for us to play with."""
-        
         for poem in range(numPoems):
             self.getPoem()
             self.poems.extend(self.poem)
@@ -299,7 +295,6 @@ class RhymingMarkovGenerator:
     
     def close(self):
         """Make sure our brains are closed so they save their contents."""
-        
         for name, brain in self.brains.items():
             brain['fwd'].close()
             brain['rev'].close()
@@ -355,7 +350,4 @@ if __name__ == "__main__":
     gen.close()
     
     for line in lines:
-        if line is None:
-            print "NO LINE"
-        else:
-            print " ".join(line)
+        print " ".join(line)
