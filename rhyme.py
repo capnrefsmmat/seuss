@@ -47,7 +47,6 @@ class RhymingMarkovGenerator:
         self.poems          = []
         self.poem           = [] # a poem is appended into poems
         self.lines          = [] # lines are appended into a poem
-        self.synonymCache   = dict()
     
     def load(self, personality):
         """Load a personality into memory by loading its Markov chains"""
@@ -106,17 +105,7 @@ class RhymingMarkovGenerator:
         
         rhymeLine = self.poem[rhymeLine]
         
-        rhymeLineText = " ".join(rhymeLine)
-        if rhymeLineText in self.synonymCache:
-            return self.synonymCache[rhymeLineText]
-        
-        syns = set()
-        for word in rhymeLine:
-            syns = syns.union(self.thesaurus.getSynonyms(self.cleanWord(word)))
-        
-        self.synonymCache[rhymeLineText] = list(syns)
-        
-        return list(syns)
+        return self.thesaurus.getListSynonyms(map(self.cleanWord, rhymeLine))
     
     def getSynonymWeight(self, word, rhymeLine):
         """Is this word a synonym of one on previous lines?"""
