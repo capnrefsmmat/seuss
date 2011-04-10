@@ -121,7 +121,7 @@ class RhymingMarkovGenerator:
     
     def addWords(self, numWords, brain, chain):
         """The challenging part. We query our Markov chain to get the next words possible in
-           this line. We then weight the words according to their frequency, alliteration,
+           this line. We then weight the words according to their frequency, synonyms,
            and so on, then choose a word using those weights."""
        
         totalWeight = 0
