@@ -9,9 +9,6 @@ class RhymingMarkovGenerator:
     """ Weights to use when calculating which words should be used next. These are largely arbitrary,
     and should be tinkered with. """
     frequencyWeight = 2
-    directAllitWeight = 0
-    indirectAllitWeight = 0
-    rhythmWeight = 0
     synonymWeight = 20
 
     # number of lines to try before picking the best line
@@ -133,66 +130,7 @@ class RhymingMarkovGenerator:
         
         return 0
     
-    def getAlliterationWeight(self, allitWord, line):
-        """Test for alliteration. Long strings of alliteration are weighted higher than short ones."""
-        
-        allitWords = 0
-        indAllitWords = 0
-        line.reverse()
-        try:
-            allitChar = self.cleanWord(allitWord)[0].lower()
-        except IndexError:
-            # this occurs when our word is actually just a piece of punctuation
-            # it can't alliterate
-            return 0
-        
-        connected = True
-        for word in line:
-            try:
-                initChar = self.cleanWord(word)[0].lower()
-            except IndexError:
-                # another piece of punctuation
-                continue
-            
-            if initChar == allitChar and connected:
-                allitWords += 1
-            elif initChar == allitChar:
-                indAllitWords +=1
-            else:
-                connected = False
-        line.reverse() # put it back the way it belongs!
-        return allitWords * self.directAllitWeight + indAllitWords * self.indirectAllitWeight
-    
-    def getRythmWeight(self, rhythmWord, line, inReverse = False):
-        """Test for meter."""
-        
-        try:
-            prevWordRhythm = self.syllables[self.cleanWord(line[-1].upper())]
-        except (KeyError, IndexError):
-            prevWordRhythm = "1"
-        
-        try:
-            curWordRhythm = self.syllables[self.cleanWord(rhythmWord.upper())]
-        except KeyError:
-            curWordRhythm = "1"
-        
-        # reverse the syllable representations so we do the line correctly while working backwards
-        if inReverse:
-            prevWordRhythm = prevWordRhythm[::-1]
-            curWordRhythm = curWordRhythm[::-1]
-        
-        if ((prevWordRhythm[-1] == "0" and curWordRhythm[0] == "0") or
-            (prevWordRhythm[-1] != "0" and curWordRhythm[0] != "0")):
-            return 0
-        
-        for i in range(1, len(curWordRhythm)):
-            if ((curWordRhythm[i] == "0" and curWordRhythm[i-1] == "0") or
-                (curWordRhythm[i] != "0" and curWordRhythm[i-1] != "0")):
-                return 0
-        
-        return self.rhythmWeight
-    
-    def addWords(self, numWords, brain, chain, endOfLine = False, inReverse = False):
+    def addWords(self, numWords, brain, chain):
         """The challenging part. We query our Markov chain to get the next words possible in
            this line. We then weight the words according to their frequency, alliteration,
            and so on, then choose a word using those weights."""
@@ -221,8 +159,6 @@ class RhymingMarkovGenerator:
             for word, num in words.iteritems():
                 # add up our weights
                 weightedWords[word] = num * self.frequencyWeight
-                #weightedWords[word] += self.getAlliterationWeight(word, seed)
-                #weightedWords[word] += self.getRythmWeight(word, seed, inReverse)
                 weightedWords[word] += self.getSynonymWeight(word, rhymeLine)
             
             rand = random.randint(0, sum(weightedWords.values()))
@@ -249,8 +185,8 @@ class RhymingMarkovGenerator:
             if newWord is not False:
                 # found a rhyme, now put three good words on the end of the line
                 self.lines.append([newWord])
-                weight += self.addWords(1, person, "rhy", inReverse = True)
-                weight += self.addWords(self.lineLen - 2, person, "rev", endOfLine = True, inReverse = True)
+                weight += self.addWords(1, person, "rhy")
+                weight += self.addWords(self.lineLen - 2, person, "rev")
                 self.lines[-1].reverse()
             else:
                 # found no rhyme, or perhaps this line doesn't need to rhyme
