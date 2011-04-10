@@ -72,7 +72,7 @@ class SeussBot(irc.IRCClient):
             prefix = ''
         
         if prefix or random.random() <= self.chatFraction:
-            self.gen.synonymCache = dict() # clear synonym cache to stop growth
+            self.gen.thesaurus.synCache = dict() # clear synonym cache to stop growth
             self.gen.poem = [msg.split(),]
             line = self.gen.getLine(random.choice(self.brains), 1)
             if len(line) == 0:
