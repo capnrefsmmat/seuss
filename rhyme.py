@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import Markov, sys, gdbm, random, os, shelve
+import Markov, sys, gdbm, random, shelve
 from thesaurus import Thesaurus
 
 class RhymingMarkovGenerator:
