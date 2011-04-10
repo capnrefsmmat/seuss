@@ -44,7 +44,6 @@ class RhymingMarkovGenerator:
         self.syllables      = shelve.open("data/syllableDB")
         self.thesaurus      = Thesaurus("data/thesaurusWords", "data/thesaurusSyns")
         
-        self.poems          = []
         self.poem           = [] # a poem is appended into poems
     
     def load(self, personality):
