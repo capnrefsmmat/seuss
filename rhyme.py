@@ -46,7 +46,6 @@ class RhymingMarkovGenerator:
         
         self.poems          = []
         self.poem           = [] # a poem is appended into poems
-        self.lines          = [] # lines are appended into a poem
     
     def load(self, personality):
         """Load a personality into memory by loading its Markov chains"""
@@ -119,7 +118,7 @@ class RhymingMarkovGenerator:
         
         return 0
     
-    def addWords(self, numWords, brain, chain):
+    def addWords(self, numWords, brain, chain, lines):
         """The challenging part. We query our Markov chain to get the next words possible in
            this line. We then weight the words according to their frequency, synonyms,
            and so on, then choose a word using those weights."""
@@ -130,10 +129,10 @@ class RhymingMarkovGenerator:
             rhymeLine = self.getRhymeLine(self.rhymeScheme[len(self.poem) - 1], len(self.poem) - 1)
         except ValueError:
             rhymeLine = False
-
+        
         # on the first line, there is no line to find yet
         try:
-            seed = self.lines[-1]
+            seed = lines[-1]
         except IndexError:
             seed = []
             self.poem.append([])
@@ -155,7 +154,7 @@ class RhymingMarkovGenerator:
             for word, weight in weightedWords.items():
                 pos += weight
                 if rand <= pos:
-                    self.lines[-1].append(word)
+                    lines[-1].append(word)
                     totalWeight += weight
                     break
         
@@ -164,7 +163,7 @@ class RhymingMarkovGenerator:
     def getLine(self, person, curLine):
         """Pick out some possible lines of poetry. Iterate through and choose the best possible line."""
         
-        self.lines = []
+        lines = []
         lineWeights = []
         for line in range(self.tryLines):
             # right, what shall we rhyme with?
@@ -173,16 +172,16 @@ class RhymingMarkovGenerator:
             
             if newWord is not False:
                 # found a rhyme, now put three good words on the end of the line
-                self.lines.append([newWord])
-                weight += self.addWords(1, person, "rhy")
-                weight += self.addWords(self.lineLen - 2, person, "rev")
-                self.lines[-1].reverse()
+                lines.append([newWord])
+                weight += self.addWords(1, person, "rhy", lines)
+                weight += self.addWords(self.lineLen - 2, person, "rev", lines)
+                lines[-1].reverse()
             else:
                 # found no rhyme, or perhaps this line doesn't need to rhyme
                 # make up a new line
-                self.lines.append([])
-                weight += self.addWords(self.lineLen, person, "fwd")
-            
+                lines.append([])
+                weight += self.addWords(self.lineLen, person, "fwd", lines)
+                
             lineWeights.append(weight)
         
         max = maxPos = -1
@@ -192,7 +191,7 @@ class RhymingMarkovGenerator:
                 max = lineWeights[i]
                 maxPos = i
         
-        return self.lines[maxPos]
+        return lines[maxPos]
     
     def getPoem(self):
         """Get a poem, according to our set rhymescheme and personality."""
