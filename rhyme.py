@@ -112,7 +112,7 @@ class RhymingMarkovGenerator:
         if len(self.poem) == 0:
             return 0
         
-        syns = self.getSynonyms(len(self.lines) - 1, rhymeLine)
+        syns = self.getSynonyms(len(self.poem) - 1, rhymeLine)
         
         if word in syns:
             return self.synonymWeight
@@ -127,7 +127,7 @@ class RhymingMarkovGenerator:
         totalWeight = 0
         
         try:
-            rhymeLine = self.getRhymeLine(self.rhymeScheme[len(self.lines) - 1], len(self.lines) - 1)
+            rhymeLine = self.getRhymeLine(self.rhymeScheme[len(self.poem) - 1], len(self.poem) - 1)
         except ValueError:
             rhymeLine = False
 
