@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import Markov, sys, gdbm, random, os, shelve
+import Markov, sys, gdbm, random, shelve
 from thesaurus import Thesaurus
 
 class RhymingMarkovGenerator:
@@ -9,9 +9,6 @@ class RhymingMarkovGenerator:
     """ Weights to use when calculating which words should be used next. These are largely arbitrary,
     and should be tinkered with. """
     frequencyWeight = 2
-    directAllitWeight = 0
-    indirectAllitWeight = 0
-    rhythmWeight = 0
     synonymWeight = 20
 
     # number of lines to try before picking the best line
@@ -47,10 +44,7 @@ class RhymingMarkovGenerator:
         self.syllables      = shelve.open("data/syllableDB")
         self.thesaurus      = Thesaurus("data/thesaurusWords", "data/thesaurusSyns")
         
-        self.poems          = []
         self.poem           = [] # a poem is appended into poems
-        self.lines          = [] # lines are appended into a poem
-        self.synonymCache   = dict()
     
     def load(self, personality):
         """Load a personality into memory by loading its Markov chains"""
@@ -65,7 +59,6 @@ class RhymingMarkovGenerator:
     
     def cleanWord(self, word):
         """ Get the junk off a word to look it up. """
-        
         return word.strip().strip(".,'!?\"()*;:-")
     
     def getRhymeLine(self, rhymeLetter, lineNumber):
@@ -108,111 +101,39 @@ class RhymingMarkovGenerator:
         if rhymeLine is False or rhymeLine > (len(self.poem) - 1) or len(self.poem[rhymeLine]) == 0:
             return [] # no rhyming required, or the line has no words
         
-        rhymeLine = self.poem[rhymeLine]
-        
-        rhymeLineText = " ".join(rhymeLine)
-        if rhymeLineText in self.synonymCache:
-            return self.synonymCache[rhymeLineText]
-        
-        syns = set()
-        for word in rhymeLine:
-            syns = syns.union(self.thesaurus.getSynonyms(self.cleanWord(word)))
-        
-        self.synonymCache[rhymeLineText] = list(syns)
-        
-        return list(syns)
+        return self.thesaurus.getListSynonyms(map(self.cleanWord, self.poem[rhymeLine]))
     
     def getSynonymWeight(self, word, rhymeLine):
         """Is this word a synonym of one on previous lines?"""
         if len(self.poem) == 0:
             return 0
         
-        syns = self.getSynonyms(len(self.lines) - 1, rhymeLine)
-        
-        if word in syns:
+        if word in self.getSynonyms(len(self.poem) - 1, rhymeLine):
             return self.synonymWeight
         
         return 0
     
-    def getAlliterationWeight(self, allitWord, line):
-        """Test for alliteration. Long strings of alliteration are weighted higher than short ones."""
-        
-        allitWords = 0
-        indAllitWords = 0
-        line.reverse()
-        try:
-            allitChar = self.cleanWord(allitWord)[0].lower()
-        except IndexError:
-            # this occurs when our word is actually just a piece of punctuation
-            # it can't alliterate
-            return 0
-        
-        connected = True
-        for word in line:
-            try:
-                initChar = self.cleanWord(word)[0].lower()
-            except IndexError:
-                # another piece of punctuation
-                continue
-            
-            if initChar == allitChar and connected:
-                allitWords += 1
-            elif initChar == allitChar:
-                indAllitWords +=1
-            else:
-                connected = False
-        line.reverse() # put it back the way it belongs!
-        return allitWords * self.directAllitWeight + indAllitWords * self.indirectAllitWeight
-    
-    def getRythmWeight(self, rhythmWord, line, inReverse = False):
-        """Test for meter."""
-        
-        try:
-            prevWordRhythm = self.syllables[self.cleanWord(line[-1].upper())]
-        except (KeyError, IndexError):
-            prevWordRhythm = "1"
-        
-        try:
-            curWordRhythm = self.syllables[self.cleanWord(rhythmWord.upper())]
-        except KeyError:
-            curWordRhythm = "1"
-        
-        # reverse the syllable representations so we do the line correctly while working backwards
-        if inReverse:
-            prevWordRhythm = prevWordRhythm[::-1]
-            curWordRhythm = curWordRhythm[::-1]
-        
-        if ((prevWordRhythm[-1] == "0" and curWordRhythm[0] == "0") or
-            (prevWordRhythm[-1] != "0" and curWordRhythm[0] != "0")):
-            return 0
-        
-        for i in range(1, len(curWordRhythm)):
-            if ((curWordRhythm[i] == "0" and curWordRhythm[i-1] == "0") or
-                (curWordRhythm[i] != "0" and curWordRhythm[i-1] != "0")):
-                return 0
-        
-        return self.rhythmWeight
-    
-    def addWords(self, numWords, brain, chain, endOfLine = False, inReverse = False):
+    def addWords(self, numWords, brain, chain, lines):
         """The challenging part. We query our Markov chain to get the next words possible in
-           this line. We then weight the words according to their frequency, alliteration,
+           this line. We then weight the words according to their frequency, synonyms,
            and so on, then choose a word using those weights."""
        
         totalWeight = 0
         
         try:
-            rhymeLine = self.getRhymeLine(self.rhymeScheme[len(self.lines) - 1], len(self.lines) - 1)
+            rhymeLine = self.getRhymeLine(self.rhymeScheme[len(self.poem) - 1], len(self.poem) - 1)
         except ValueError:
             rhymeLine = False
+        
+        # try to get the previous words on this line as a seed. if there are none, start a new line
+        # (either lines is empty, or it contains the last few words on a line to be completed)
+        try:
+            seed = lines[-1]
+        except IndexError:
+            seed = []
+            self.poem.append([])
 
         for i in range(numWords):
-            # on the first line, there is no line to find yet
-            try:
-                seed = self.lines[-1]
-            except IndexError:
-                seed = []
-                self.poem.append([])
-            
             words = self.brains[brain][chain].getNextWords(seed)
             
             if len(words) == 0:
@@ -220,20 +141,16 @@ class RhymingMarkovGenerator:
             
             weightedWords = dict()
             for word, num in words.iteritems():
-                if word is None: # for some reasons our chains have None in them
-                    continue
-                # add up our weights
                 weightedWords[word] = num * self.frequencyWeight
-                #weightedWords[word] += self.getAlliterationWeight(word, seed)
-                #weightedWords[word] += self.getRythmWeight(word, seed, inReverse)
                 weightedWords[word] += self.getSynonymWeight(word, rhymeLine)
             
+            # do a weighted random selection from the words
             rand = random.randint(0, sum(weightedWords.values()))
             pos = 0
             for word, weight in weightedWords.items():
                 pos += weight
                 if rand <= pos:
-                    self.lines[-1].append(word)
+                    lines[-1].append(word)
                     totalWeight += weight
                     break
         
@@ -242,35 +159,30 @@ class RhymingMarkovGenerator:
     def getLine(self, person, curLine):
         """Pick out some possible lines of poetry. Iterate through and choose the best possible line."""
         
-        self.lines = []
-        lineWeights = []
-        for line in range(self.tryLines):
+        lines = []
+        maxLine = maxWeight = -1
+        
+        for line in range(0, self.tryLines-1):
             # right, what shall we rhyme with?
             newWord = self.getRhymingWord(curLine, person)
             weight = 0
             
             if newWord is not False:
                 # found a rhyme, now put three good words on the end of the line
-                self.lines.append([newWord])
-                weight += self.addWords(1, person, "rhy", inReverse = True)
-                weight += self.addWords(self.lineLen - 2, person, "rev", endOfLine = True, inReverse = True)
-                self.lines[-1].reverse()
+                lines.append([newWord])
+                weight += self.addWords(1, person, "rhy", lines)
+                weight += self.addWords(self.lineLen - 2, person, "rev", lines)
+                lines[-1].reverse()
             else:
-                # found no rhyme, or perhaps this line doesn't need to rhyme
-                # make up a new line
-                self.lines.append([])
-                weight += self.addWords(self.lineLen, person, "fwd")
-            
-            lineWeights.append(weight)
+                # found no rhyme, or perhaps this line doesn't need to rhyme.
+                lines.append([])
+                weight += self.addWords(self.lineLen, person, "fwd", lines)
+                
+            if weight > maxWeight:
+                maxWeight = weight
+                maxLine = line
         
-        max = maxPos = -1
-
-        for i in range(self.tryLines):
-            if lineWeights[i] > max:
-                max = lineWeights[i]
-                maxPos = i
-        
-        return self.lines[maxPos]
+        return lines[maxLine]
     
     def getPoem(self):
         """Get a poem, according to our set rhymescheme and personality."""
@@ -285,21 +197,17 @@ class RhymingMarkovGenerator:
             
             person = self.personalities[i] # what brain are we rhyming with?
             
-            self.poem.append(self.getLine(person, i))
+            self.poem.append(" ".join(self.getLine(person, i)))
     
-    def getPoems(self, numPoems):
-        """So, get numPoems poems for us to play with."""
-        
-        for poem in range(numPoems):
-            self.getPoem()
-            self.poems.extend(self.poem)
-            self.poems.append([""])
-        
-        return self.poems
+    def __iter__(self):
+        return self
+    
+    def next(self):
+        self.getPoem()
+        return self.poem
     
     def close(self):
         """Make sure our brains are closed so they save their contents."""
-        
         for name, brain in self.brains.items():
             brain['fwd'].close()
             brain['rev'].close()
@@ -313,24 +221,24 @@ people = {"b": "bible", "e": "erotica", "c": "carroll", "u": "unabomber", "w": "
 if __name__ == "__main__":         
     if len(sys.argv) < 5:
         print """Usage:
-    rhyme.py personality rhymescheme linelength numpoems
-        
-    where personality is a choice of personality, rhymescheme is a rhyme scheme,
-    such as "aaaba", linelength is an integer representing the maximum number of
-    words per line, and numpoems is the number of repetitions desired.
+rhyme.py personality rhymescheme linelength numpoems
     
-    Personality choices are per-line, so personality must match rhymescheme in 
-    length. Each character corresponds to a personality.
-    
-    If a rhyme scheme spans multiple stanzas, it can be specified as follows:
-      abab:cdcd:ee
-    and so on. The ":" characters indicate a stanza division.
-    
-    If numlines is larger than the size the rhyme scheme indicates, multiple
-    repetitions of the rhyme scheme will be made. Only whole repetitions
-    are attemped, so if the rhyme scheme is five lines long and numlines 7,
-    only one set will be constructed. Once numlines is raised to 10, the
-    rhyme scheme will be repeated once in another set of stanzas."""
+where personality is a choice of personality, rhymescheme is a rhyme scheme,
+such as "aaaba", linelength is an integer representing the maximum number of
+words per line, and numpoems is the number of repetitions desired.
+
+Personality choices are per-line, so personality must match rhymescheme in 
+length. Each character corresponds to a personality.
+
+If a rhyme scheme spans multiple stanzas, it can be specified as follows:
+  abab:cdcd:ee
+and so on. The ":" characters indicate a stanza division.
+
+If numlines is larger than the size the rhyme scheme indicates, multiple
+repetitions of the rhyme scheme will be made. Only whole repetitions are
+attemped, so if the rhyme scheme is five lines long and numlines 7, only one
+set will be constructed. Once numlines is raised to 10, the rhyme scheme will
+be repeated once in another set of stanzas."""
         print ""
         print "Available personalities:"
         for char, personality in people.items():
@@ -350,9 +258,11 @@ if __name__ == "__main__":
         personalities.append(people[personality])
     
     gen = RhymingMarkovGenerator(rhymescheme, personalities, lineLength, sourceDir, cacheDir)
-
-    lines = gen.getPoems(numPoems)
-    gen.close()
     
-    for line in lines:
-        print " ".join(line)
+    for i in range(numPoems):
+        poem = gen.next()
+        for line in poem:
+            print line
+        print ""
+    
+    gen.close()
