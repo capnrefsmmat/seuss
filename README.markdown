@@ -1,3 +1,6 @@
+seuss
+=====
+
 A Python system for generating rhyming poetry with Markov chains.
 
 Overview
@@ -6,6 +9,9 @@ Overview
 The Rhyming Robot (seuss) uses Markov chains to generate random text. The
 chains are generated from analysis of selected source texts placed in the
 `sources/` directory -- preferably source texts of 50,000 words or greater.
+Each line in a poem can be generated using different source texts, allowing
+surprising and amusing combinations (the Bible and legal disclaimers, for
+instance).
 
 Markov chains are generated in advance and cached in the `cache/` directory
 by makeChains.py. There are three Markov chains used:
