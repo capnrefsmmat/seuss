@@ -50,7 +50,13 @@ class SeussBot(irc.IRCClient):
                     channel = msg[1]
                     msg = msg[2]
                     print "Rhyming on command in %s: '%s'" % (channel, msg)
-                
+
+                if msg.startswith('act'):
+                    msg = msg.split(' ', 2)
+                    self.describe(msg[1], msg[2].strip())
+                    print "Acting on command in %s: '%s'" % (msg[1], msg[2])
+                    return
+            
             prefix = True
         elif self.nickname in msg.lower():
             msg = re.compile(self.nickname + "[:,]* ?", re.I).sub('', msg)
