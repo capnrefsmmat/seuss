@@ -162,7 +162,7 @@ class RhymingMarkovGenerator:
         lines = []
         maxLine = maxWeight = -1
         
-        for line in range(0, self.tryLines-1):
+        for line in range(0, self.tryLines):
             # right, what shall we rhyme with?
             newWord = self.getRhymingWord(curLine, person)
             weight = 0
