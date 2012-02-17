@@ -81,7 +81,7 @@ class RhymingMarkovGenerator:
             rhymeLine = self.getRhymeLine(curLine)
         except ValueError:
             return None
-        
+
         rhymeWord = self.poem[rhymeLine].split()[-1]
         
         rhymes = self.getRhymes(rhymeWord)
@@ -90,7 +90,7 @@ class RhymingMarkovGenerator:
         
         # now we look for rhyming words in our chain
         for rhyme in rhymes:
-            word = self.brains[person]["rev"].chain.get(rhyme.lower())
+            word = self.brains[person]["rev"].chain.get(str(rhyme.lower()))
             if (word is not None and
                 rhyme.lower() != self.cleanWord(rhymeWord.lower())):
                 return rhyme.lower()

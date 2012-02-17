@@ -37,7 +37,7 @@ class MarkovChain:
 		if len(line) < self.level:
 			line = [self.start] * (self.level - len(line)) + line
 		
-		key = " ".join(line[-self.level:])
+		key = str(" ".join(line[-self.level:]))
 		
 		if key in self.chain:
 			return self.chain[key]
