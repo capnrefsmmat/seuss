@@ -11,7 +11,8 @@ class SeussBot(irc.IRCClient):
     def __init__(self):
         self.chatFraction = 0.010 # fraction of messages we respond to in rhyme
         self.brains = ['erotica', 'weeping', 'wikisex', 'fanny-hill']
-        self.gen = rhyme.RhymingMarkovGenerator('a' * len(self.brains), self.brains, 12, "cache/")
+        self.gen = rhyme.RhymingMarkovGenerator('a' * len(self.brains),
+                                                self.brains, 10, "cache/")
         self.nickExcludeList = ['ChanServ', 'NickServ', 'Global']
         
     def _get_nickname(self):
@@ -64,13 +65,13 @@ class SeussBot(irc.IRCClient):
             prefix = ''
         
         if prefix or random.random() <= self.chatFraction:
-            self.gen.poem = [msg.split(),]
+            self.gen.poem = [msg,]
             line = self.gen.getLine(random.choice(self.brains), 1)
             if len(line) == 0:
                 return
             line[-1] = self.gen.cleanWord(line[-1])
             rhyme = " ".join(line) + random.choice(['!', '?', '.'])
-            self.msg(channel, rhyme)
+            self.msg(channel, str(rhyme))
             print "%s: '%s'" % (channel, rhyme) 
 
     # don't reply to automated messages!    
