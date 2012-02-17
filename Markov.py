@@ -13,7 +13,7 @@ class MarkovChain:
 					 writeback = wb)
 	
 	def add(self, iterable):
-		""" Insert an iterable (pattern) item into the markov chain.
+		""" Insert an iterable (pattern) item into the Markov chain.
 			The order of the pattern will define more of the chain.
 		"""
 		prefix = [self.start] * self.level

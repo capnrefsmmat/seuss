@@ -2,19 +2,24 @@
 """Using cmudict, make a Shelve database of word->syllables pairs. Update
    cmudict.txt to the latest version of the cmudict to get best results."""
 
-import shelve
+import sqlite3
 
-f = open("cmudict.txt", "r")
-db = shelve.open("syllableDB", protocol = 2)
+conn = sqlite3.connect("data/sql-words")
+conn.row_factory = sqlite3.Row
+
+c = conn.cursor()
+
+
+f = open("data/cmudict.txt", "r")
 
 for line in f:
     if line.startswith(";;;"):
         continue
     
     item = line.split(None, 1) # split word and pronunciation apart
-    key = item[0].replace("_", " ") # two-word keys use _ as a separator
-    value = filter(str.isdigit, item[1]) # only return syllable weighting
-    
-    db[key] = value
+    word = item[0].lower()
+    syllables = item[1]
 
-db.close()
+    c.execute("UPDATE words SET syllables = ? WHERE word = ?", (syllables, word))
+
+conn.commit()

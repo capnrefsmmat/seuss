@@ -11,8 +11,7 @@ class SeussBot(irc.IRCClient):
     def __init__(self):
         self.chatFraction = 0.010 # fraction of messages we respond to in rhyme
         self.brains = ['erotica', 'weeping', 'wikisex', 'bible']
-        self.gen = rhyme.RhymingMarkovGenerator('a' * len(self.brains), self.brains, 12, "sources/", "cache/")
-        self.gen.tryLines = 1 # minimize load by not trying very hard
+        self.gen = rhyme.RhymingMarkovGenerator('a' * len(self.brains), self.brains, 12, "cache/")
         self.nickExcludeList = ['ChanServ', 'NickServ', 'Global']
         
     def _get_nickname(self):
@@ -65,7 +64,6 @@ class SeussBot(irc.IRCClient):
             prefix = ''
         
         if prefix or random.random() <= self.chatFraction:
-            self.gen.thesaurus.synCache = dict() # clear synonym cache to stop growth
             self.gen.poem = [msg.split(),]
             line = self.gen.getLine(random.choice(self.brains), 1)
             if len(line) == 0:
