@@ -10,7 +10,7 @@ from twisted.internet import reactor
 class SeussBot(irc.IRCClient):
     def __init__(self):
         self.chatFraction = 0.010 # fraction of messages we respond to in rhyme
-        self.brains = ['erotica', 'weeping', 'wikisex', 'bible']
+        self.brains = ['erotica', 'weeping', 'wikisex', 'fanny-hill']
         self.gen = rhyme.RhymingMarkovGenerator('a' * len(self.brains), self.brains, 12, "cache/")
         self.nickExcludeList = ['ChanServ', 'NickServ', 'Global']
         
