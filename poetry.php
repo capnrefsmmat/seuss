@@ -4,7 +4,8 @@ $defaultBrains = "bbbjj";
 $defaultLen = 7;
 $defaultLines = 2;
 
-$brainChoices = array('b', 'e', 'c', 'w', 'u', 'j', 'l', 'k', 't', 'k', 'x', 's');
+$brainChoices = array('b', 'e', 'c', 'w', 'u', 'j', 'l', 'k', 't', 'k', 
+                      'x', 's', 'n', 'f');
 if (isset($_POST['rhymescheme']) && isset($_POST['brains']) && isset($_POST['linelen'])
     && isset($_POST['numlines']))
 {
