@@ -127,3 +127,15 @@ substantial amount of processing power. Nevertheless, for your amusement,
 directory and point people to `poetry.php`. Make sure they can't invoke the
 Python files from the web, of course. `poetry.php` must be adjusted with a list
 of all the valid source texts you have provided.
+
+Recommended References
+----------------------
+
+It turns out that random generation of amusing content has been around for a
+while. Here's some suggestions:
+
+- [Wisdom of Chopra](http://www.wisdomofchopra.com/), a random Deepak Chopra
+  quote generator.
+- [Mathgen](http://thatsmathematics.com/mathgen/), a random academic mathematics
+  paper generator
+- [A poem generator in Haskell](http://swizec.com/blog/markov-chain-poem-trainergenerator-in-29-sloc-of-haskell/swizec/5310)
