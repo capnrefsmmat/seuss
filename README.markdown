@@ -32,6 +32,27 @@ The basic process looks like this:
 3. Subsequent lines follow the same process, according to the supplied rhyme
    scheme.
 
+Setup
+-----
+
+The rhyming dictionary is contained in `data/words.sql.gz`. You'll need to
+import this into an SQLite database named `data/sql-words`. To do this, open a
+shell in the `data/` directory and type:
+
+```
+$ gunzip words.sql.gz
+$ sqlite3 sql-words
+SQLite version 3.7.13 2012-06-11 02:05:22
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+
+sqlite> .read words.sql
+sqlite> .quit
+```
+
+This creates the database and reads the data into it. You're now ready to use
+the Rhyming Robot.
+
 Usage
 -----
 
@@ -44,8 +65,9 @@ Next, run `format.pl` to split the file into sentences:
 
     $ format.pl bible
 
-This will produce `bible.txt`, which contains the Bible with one sentence per
-line. This can be loaded by the Markov chain generator.
+`format.pl` will take `name-raw.txt` and transform it into `name.txt`, which
+contains the same source with one sentence per line. This can be loaded by the
+Markov chain generator.
 
 Heading back up to the directory containing `makeChains.py`, run:
 
