@@ -56,10 +56,15 @@ the Rhyming Robot.
 Usage
 -----
 
-First, supply the robot with a source text. In this example, we will use the 
-World English Bible from ebible.org; use the plain-text version and put it all
-in one text file. Cut out any parts you do not want and save it in `sources/`
-as `bible-raw.txt`.
+First, supply the robot with a source text. Ideal source texts are very long
+(50,000 words or more) and amusing. Choose a source with a normal English
+vocabulary -- the rhyming dictionary does not understand specialized terminology
+or foreign languages. You may supply as many source texts as you like and switch
+between them.
+
+In this example, we will use the World English Bible from ebible.org; use the
+plain-text version and put it all in one text file. Cut out any parts you do not
+want and save it in `sources/` as `bible-raw.txt`.
 
 Next, run `format.pl` to split the file into sentences:
 
@@ -77,7 +82,16 @@ This may take a long time. Ensure the script has access to the `cache/`
 directory and can create files there. Once done, there should be three new
 files in `cache/` containing the Markov chains.
 
-You can now write poetry. Run `python rhyme.py` to see the usage instructions.
+Now you'll need to edit the `people` dictionary in `rhyme.py` to know about your
+new source. The dictionary maps single characters to source names; you'll use
+these characters when choosing what sources will be written in your poem.
+
+You can now write poetry. If you added the Bible with code `b` in the `people`
+dictionary, you can specify a rhymescheme `aabba` and personality `bbbbb` to
+have the generator use the Bible for every line. The personality specification
+must be the same length as the rhymescheme.
+
+Run `python rhyme.py` to see the detailed usage instructions.
 
 IRC Bot
 -------
