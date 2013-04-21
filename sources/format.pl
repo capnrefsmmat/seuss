@@ -36,6 +36,14 @@ open(STUFF,">$stuff");  open(THINGS,"<$things");
 my $ram_is_cheap = join('', <THINGS>);
 $ram_is_cheap =~ s/\r\n/ /g;  $ram_is_cheap =~ s/\n/ /g;
 
+# kill smart-quotes, em-dashes, and other special characters
+$ram_is_cheap =~ s/“/"/g;
+$ram_is_cheap =~ s/”/"/g;
+$ram_is_cheap =~ s/’/'/g;
+$ram_is_cheap =~ s/–/--/g;
+$ram_is_cheap =~ s/‘/'/g;
+$ram_is_cheap =~ s/…/.../g;
+
 # loop patterns, replace with original pattern plus newline
 for my $pattern (@split_on)
 {

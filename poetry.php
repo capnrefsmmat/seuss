@@ -4,7 +4,8 @@ $defaultBrains = "bbbjj";
 $defaultLen = 7;
 $defaultLines = 2;
 
-$brainChoices = array('b', 'e', 'c', 'w', 'u', 'j', 'l', 'k', 't', 'k', 'x', 's');
+$brainChoices = array('b', 'e', 'c', 'w', 'u', 'j', 'l', 'k', 't', 'k', 
+                      'x', 's', 'n', 'f');
 if (isset($_POST['rhymescheme']) && isset($_POST['brains']) && isset($_POST['linelen'])
     && isset($_POST['numlines']))
 {
@@ -60,19 +61,21 @@ if (isset($_POST['rhymescheme']) && isset($_POST['brains']) && isset($_POST['lin
         </p>
         <?php } ?>
         <div style="float:right">
-            <h3>Sources, "best" first</h3>
+            <h3>Sources</h3>
             <ul>
                 <li>b: Bible</li>
+                <li>w: Weeping Cock</li>
+                <li>e: Erotica</li>
+                <li>n: Henri Bergson</li>
+                <li>f: Fanny Hill</li>
                 <li>j: James Joyce</li>
                 <li>t: Mark Twain</li>
+                <li>x: Wikipedia on sex</li>
                 <li>k: Franz Kafka</li>
-                <li>e: Erotica</li>
                 <li>s: Kamasutra</li>
                 <li>c: Lewis Carroll</li>
-                <li>w: Weeping Cock</li>
                 <li>l: Legalese</li>
-                <li>x: Wikipedia on sex</li>
-                <li>u: Unabomber</li>
+                <li>u: Unabomber manifesto</li>
             </ul>
         </div>
         <h3>Make a Poem</h3>

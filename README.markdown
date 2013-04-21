@@ -32,20 +32,47 @@ The basic process looks like this:
 3. Subsequent lines follow the same process, according to the supplied rhyme
    scheme.
 
+Setup
+-----
+
+The rhyming dictionary is contained in `data/words.sql.gz`. You'll need to
+import this into an SQLite database named `data/sql-words`. To do this, open a
+shell in the `data/` directory and type:
+
+```
+$ gunzip words.sql.gz
+$ sqlite3 sql-words
+SQLite version 3.7.13 2012-06-11 02:05:22
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+
+sqlite> .read words.sql
+sqlite> .quit
+```
+
+This creates the database and reads the data into it. You're now ready to use
+the Rhyming Robot.
+
 Usage
 -----
 
-First, supply the robot with a source text. In this example, we will use the 
-World English Bible from ebible.org; use the plain-text version and put it all
-in one text file. Cut out any parts you do not want and save it in `sources/`
-as `bible-raw.txt`.
+First, supply the robot with a source text. Ideal source texts are very long
+(50,000 words or more) and amusing. Choose a source with a normal English
+vocabulary -- the rhyming dictionary does not understand specialized terminology
+or foreign languages. You may supply as many source texts as you like and switch
+between them.
+
+In this example, we will use the World English Bible from ebible.org; use the
+plain-text version and put it all in one text file. Cut out any parts you do not
+want and save it in `sources/` as `bible-raw.txt`.
 
 Next, run `format.pl` to split the file into sentences:
 
     $ format.pl bible
 
-This will produce `bible.txt`, which contains the Bible with one sentence per
-line. This can be loaded by the Markov chain generator.
+`format.pl` will take `name-raw.txt` and transform it into `name.txt`, which
+contains the same source with one sentence per line. This can be loaded by the
+Markov chain generator.
 
 Heading back up to the directory containing `makeChains.py`, run:
 
@@ -55,7 +82,16 @@ This may take a long time. Ensure the script has access to the `cache/`
 directory and can create files there. Once done, there should be three new
 files in `cache/` containing the Markov chains.
 
-You can now write poetry. Run `python rhyme.py` to see the usage instructions.
+Now you'll need to edit the `people` dictionary in `rhyme.py` to know about your
+new source. The dictionary maps single characters to source names; you'll use
+these characters when choosing what sources will be written in your poem.
+
+You can now write poetry. If you added the Bible with code `b` in the `people`
+dictionary, you can specify a rhymescheme `aabba` and personality `bbbbb` to
+have the generator use the Bible for every line. The personality specification
+must be the same length as the rhymescheme.
+
+Run `python rhyme.py` to see the detailed usage instructions.
 
 IRC Bot
 -------
@@ -91,3 +127,15 @@ substantial amount of processing power. Nevertheless, for your amusement,
 directory and point people to `poetry.php`. Make sure they can't invoke the
 Python files from the web, of course. `poetry.php` must be adjusted with a list
 of all the valid source texts you have provided.
+
+Recommended References
+----------------------
+
+It turns out that random generation of amusing content has been around for a
+while. Here's some suggestions:
+
+- [Wisdom of Chopra](http://www.wisdomofchopra.com/), a random Deepak Chopra
+  quote generator.
+- [Mathgen](http://thatsmathematics.com/mathgen/), a random academic mathematics
+  paper generator
+- [A poem generator in Haskell](http://swizec.com/blog/markov-chain-poem-trainergenerator-in-29-sloc-of-haskell/swizec/5310)

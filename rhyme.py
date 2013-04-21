@@ -179,7 +179,8 @@ class RhymingMarkovGenerator:
 people = {"b": "bible", "e": "erotica", "c": "carroll", "u": "unabomber",
           "w": "weeping", "j": "ulysses", "l": "legal", "k": "kafka",
           "t": "twain", "s": "kamasutra", "x": "wikisex", "g": "starwars",
-          "f": "fanny-hill", "a": "fiftyshades", "d": "dprk"}
+          "f": "fanny-hill", "a": "fiftyshades", "d": "dprk",
+          "n": "bergson"}
 
 if __name__ == "__main__":         
     if len(sys.argv) < 5:
